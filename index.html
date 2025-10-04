@@ -1,792 +1,889 @@
 <!DOCTYPE html>
 <html lang="cs">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Janis: Mistr Prokrastinace</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Inter Font -->
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Roboto+Mono:wght@400;700&display=swap');
-	
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #fafafa; /* Instagram-like light background */
-            min-height: 100vh;
-            overflow-x: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .container-shadow {
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border: 1px solid #dbdbdb;
-        }
-        .typewriter-cursor {
-            display: inline-block;
-            width: 8px;
-            height: 1.2em;
-            margin-left: 2px;
-            background-color: #262626;
-            animation: blink 0.7s infinite;
-        }
-.text-sm {font-size: 12px!important}
-@keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-        .chat-message {
-    max-width: 80%;
-    padding: 8px 12px;
-    border-radius: 22px;
-    margin: 8px;
-    font-weight: 400;
-    font-size: 12px;
-    line-height: 1.4;
-        text-align: left;
-    padding-left: 18px;
-}
-        /* Janis Bubble: Instagram-like message bubble */
-        .janis-bubble {
-            background-color: #efefef;
-            color: #262626;
-            align-self: flex-start;
-            border: none;
-            border-bottom-left-radius: 4px;
-        }
-        /* Player Bubble: Instagram DM style */
-        .player-bubble {
-            background-color: #0095f6;
-            color: white;
-            align-self: flex-end;
-            margin-left: auto;
-            border-bottom-right-radius: 4px;
-        }
-        .chat-history {
-            height: calc(100vh - 200px);
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            padding: 16px;
-            background-color: #fafafa;
-            /* Instagram-like scrollbar */
-            scrollbar-width: none;
-        }
-        .chat-history::-webkit-scrollbar {
-            display: none;
-        }
-        /* Instagram header style */
-        .instagram-header {
-            background: linear-gradient(45deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d);
-            background: white;
-            border-bottom: 1px solid #dbdbdb;
-        }
-        /* Typing indicator */
-        .typing-indicator {
-            background-color: #efefef;
-            padding: 12px 16px;
-            border-radius: 22px;
-            align-self: flex-start;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            border-bottom-left-radius: 4px;
-        }
-        .typing-dot {
-            width: 6px;
-            height: 6px;
-            background-color: #8e8e8e;
-            border-radius: 50%;
-            animation: typing 1.4s infinite ease-in-out;
-        }
-        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes typing {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-4px); }
-        }
-        /* CSS pro animaci modalu */
-        .modal-content {
-            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
-        }
-        .modal-show .modal-content {
-            transform: scale(1);
-            opacity: 1;
-        }
-        .modal-hide .modal-content {
-            transform: scale(0.95);
-            opacity: 0;
-        }
-        /* Instagram-style message buttons */
-        .chat-option-btn {
-            @apply px-4 py-3 bg-blue-500 text-white font-normal rounded-lg hover:bg-blue-600 transition duration-150 border border-blue-600 text-sm text-left w-full;
-        }
-.chat-option-btn:disabled {
-             @apply bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200;
-        }
-        /* Instagram bottom input bar */
-        .message-input-container {
-            background: white;
-            border-top: 1px solid #dbdbdb;
-            padding: 12px 16px;
-        }
-
-</style>
-</head>
-<body class="bg-white">
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center text-gray-800">
-        <div class="w-16 h-16 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin mb-4"></div>
-        <div class="text-lg font-medium">Janis se připojuje...</div>
-        <p class="mt-2 text-sm text-gray-500">Načítám konverzaci</p>
-    </div>
-    <!-- Main Container -->
-    <div class="w-full max-w-md mx-auto h-screen bg-white flex flex-col">
-        <!-- Instagram-like Header -->
-        <div class="instagram-header px-4 py-3 flex items-center justify-between border-b border-gray-300">
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Janis: Mistr Prokrastinace</title>
+      <!-- Tailwind CSS CDN -->
+      <script src="https://cdn.tailwindcss.com"></script>
+      <!-- Inter Font -->
+      <style>
+         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Roboto+Mono:wght@400;700&display=swap');
+         body {
+         font-family: 'Inter', sans-serif;
+         background-color: #fafafa; /* Instagram-like light background */
+         min-height: 100vh;
+         overflow-x: hidden;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         }
+         .container-shadow {
+         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+         border: 1px solid #dbdbdb;
+         }
+         .typewriter-cursor {
+         display: inline-block;
+         width: 8px;
+         height: 1.2em;
+         margin-left: 2px;
+         background-color: #262626;
+         animation: blink 0.7s infinite;
+         }
+         .text-sm {font-size: 12px!important}
+         @keyframes blink {
+         0%, 100% { opacity: 1; }
+         50% { opacity: 0; }
+         }
+         .chat-message {
+         max-width: 80%;
+         padding: 8px 12px;
+         border-radius: 22px;
+         margin: 8px;
+         font-weight: 400;
+         font-size: 12px;
+         line-height: 1.4;
+         text-align: left;
+         padding-left: 18px;
+         }
+         /* Janis Bubble: Instagram-like message bubble */
+         .janis-bubble {
+         background-color: #efefef;
+         color: #262626;
+         align-self: flex-start;
+         border: none;
+         border-bottom-left-radius: 4px;
+         }
+         /* Player Bubble: Instagram DM style */
+         .player-bubble {
+         background-color: #0095f6;
+         color: white;
+         align-self: flex-end;
+         margin-left: auto;
+         border-bottom-right-radius: 4px;
+         }
+         .chat-history {
+         height: calc(100vh - 200px);
+         overflow-y: auto;
+         display: flex;
+         flex-direction: column;
+         padding: 16px;
+         background-color: #fafafa;
+         /* Instagram-like scrollbar */
+         scrollbar-width: none;
+         }
+         .chat-history::-webkit-scrollbar {
+         display: none;
+         }
+         /* Instagram header style */
+         .instagram-header {
+         background: linear-gradient(45deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d);
+         background: white;
+         border-bottom: 1px solid #dbdbdb;
+         }
+         /* Typing indicator */
+         .typing-indicator {
+         background-color: #efefef;
+         padding: 12px 16px;
+         border-radius: 22px;
+         align-self: flex-start;
+         display: inline-flex;
+         align-items: center;
+         gap: 4px;
+         border-bottom-left-radius: 4px;
+         }
+         .typing-dot {
+         width: 6px;
+         height: 6px;
+         background-color: #8e8e8e;
+         border-radius: 50%;
+         animation: typing 1.4s infinite ease-in-out;
+         }
+         .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+         .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+         @keyframes typing {
+         0%, 60%, 100% { transform: translateY(0); }
+         30% { transform: translateY(-4px); }
+         }
+         /* CSS pro animaci modalu */
+         .modal-content {
+         transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+         }
+         .modal-show .modal-content {
+         transform: scale(1);
+         opacity: 1;
+         }
+         .modal-hide .modal-content {
+         transform: scale(0.95);
+         opacity: 0;
+         }
+         /* Instagram-style message buttons */
+         .chat-option-btn {
+         @apply px-4 py-3 bg-blue-500 text-white font-normal rounded-lg hover:bg-blue-600 transition duration-150 border border-blue-600 text-sm text-left w-full;
+         }
+         .chat-option-btn:disabled {
+         @apply bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200;
+         }
+         /* Instagram bottom input bar */
+         .message-input-container {
+         background: white;
+         border-top: 1px solid #dbdbdb;
+         padding: 12px 16px;
+         }
+      </style>
+   </head>
+   <body class="bg-white">
+      <!-- Loading Screen -->
+      <div id="loading-screen" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center text-gray-800">
+         <div class="w-16 h-16 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+         <div class="text-lg font-medium">Janis se připojuje...</div>
+         <p class="mt-2 text-sm text-gray-500">Načítám konverzaci</p>
+      </div>
+      <!-- Main Container -->
+      <div class="w-full max-w-md mx-auto h-screen bg-white flex flex-col">
+         <!-- Instagram-like Header -->
+         <div class="instagram-header px-4 py-3 flex items-center justify-between border-b border-gray-300">
             <div class="flex items-center space-x-3">
-                <!-- Back button -->
-                <button class="text-gray-800">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
-                        <path d="M19 12H5M12 19l-7-7 7-7"/>
-                    </svg>
-                </button>
-                <!-- Profile picture and name -->
-                <div class="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full"></div>
-                <div>
-                    <h2 class="font-semibold text-sm">janis_procrastination</h2>
-                    <p class="text-xs text-gray-500">Online před chvílí</p>
-                </div>
+               <!-- Back button -->
+               <button class="text-gray-800">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                     <path d="M19 12H5M12 19l-7-7 7-7"/>
+                  </svg>
+               </button>
+               <!-- Profile picture and name -->
+               <div class="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full"></div>
+               <div>
+                  <h2 class="font-semibold text-sm">janis_procrastination</h2>
+                  <p class="text-xs text-gray-500">Online před chvílí</p>
+               </div>
             </div>
             <!-- Settings and more options -->
             <div class="flex items-center space-x-3">
-                <button class="text-gray-800">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
-                        <circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/>
-                    </svg>
-                </button>
-                <button id="settings-button" class="text-gray-800">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
-                        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                    </svg>
-                </button>
+               <button class="text-gray-800">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                     <circle cx="12" cy="12" r="1"/>
+                     <circle cx="12" cy="5" r="1"/>
+                     <circle cx="12" cy="19" r="1"/>
+                  </svg>
+               </button>
+               <button id="settings-button" class="text-gray-800">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                     <circle cx="12" cy="12" r="3"/>
+                     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                  </svg>
+               </button>
             </div>
-        </div>
-
-        <!-- Chat Interface -->
-        <div id="game-container" class="flex-1 flex flex-col transition-opacity duration-500 opacity-0 hidden">
-            
+         </div>
+         <!-- Chat Interface -->
+         <div id="game-container" class="flex-1 flex flex-col transition-opacity duration-500 opacity-0 hidden">
             <!-- Chat History Display -->
             <div id="chat-history" class="chat-history flex-grow">
-                <div class="janis-bubble chat-message">
-                    Ahoj, jsem Janis👋
-                </div>
-
+               <div class="janis-bubble chat-message">
+                  Ahoj, jsem Janis👋
+               </div>
             </div>
-        <!-- Current Response Area -->
-        <div class="message-input-container">
-            <!-- Typing indicator will be shown in chat history instead -->
-
-            <!-- Dynamic Options Container -->
-            <div id="player-options-container" class="space-y-3 mt-4">
-                <!-- Dynamic buttons will be added here by JS -->
+            <!-- Current Response Area -->
+            <div class="message-input-container">
+               <!-- Typing indicator will be shown in chat history instead -->
+               <!-- Dynamic Options Container -->
+               <div id="player-options-container" class="space-y-3 mt-4">
+                  <!-- Dynamic buttons will be added here by JS -->
+               </div>
+               <!-- Stats bar (minimal, Instagram-style) -->
+               <div class="mt-4 pt-3 border-t border-gray-200">
+                  <div class="flex justify-between items-center text-xs text-gray-500">
+                     <span>Interakce: <span id="interaction-count" class="font-medium">0</span></span>
+                     <span id="user-id-display" class="text-gray-400">Načítám...</span>
+                  </div>
+               </div>
             </div>
-
-            <!-- Stats bar (minimal, Instagram-style) -->
-            <div class="mt-4 pt-3 border-t border-gray-200">
-                <div class="flex justify-between items-center text-xs text-gray-500">
-                    <span>Interakce: <span id="interaction-count" class="font-medium">0</span></span>
-                    <span id="user-id-display" class="text-gray-400">Načítám...</span>
-                </div>
-            </div>
-        </div>
-</div>
-    </div>
-
-    <!-- Notification/Message Box -->
-    <div id="message-box" class="fixed top-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-black bg-opacity-80 text-white text-sm rounded-lg shadow-xl hidden transition-opacity duration-300 z-50">
-        <!-- Messages appear here -->
-    </div>
-<!-- Settings Modal -->
-    <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden items-center justify-center transition-opacity duration-300 opacity-0 modal-hide">
-        <div class="modal-content bg-white text-gray-900 rounded-xl p-6 w-11/12 max-w-md shadow-2xl transform scale-95">
+         </div>
+      </div>
+      <!-- Notification/Message Box -->
+      <div id="message-box" class="fixed top-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-black bg-opacity-80 text-white text-sm rounded-lg shadow-xl hidden transition-opacity duration-300 z-50">
+         <!-- Messages appear here -->
+      </div>
+      <!-- Settings Modal -->
+      <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden items-center justify-center transition-opacity duration-300 opacity-0 modal-hide">
+         <div class="modal-content bg-white text-gray-900 rounded-xl p-6 w-11/12 max-w-md shadow-2xl transform scale-95">
             <div class="flex justify-between items-center border-b pb-3 mb-4">
-                <h3 class="text-xl font-semibold text-slate-800">Nastavení Hry</h3>
-                <button id="close-settings" class="text-gray-500 hover:text-gray-800">
-                    <!-- Close Icon (X) -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
+               <h3 class="text-xl font-semibold text-slate-800">Nastavení Hry</h3>
+               <button id="close-settings" class="text-gray-500 hover:text-gray-800">
+                  <!-- Close Icon (X) -->
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+                     <line x1="18" y1="6" x2="6" y2="18"></line>
+                     <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+               </button>
             </div>
-
             <div class="space-y-4">
-                <p class="text-sm text-gray-600 font-normal">
-                    Pokud není k dispozici Firebase, hra se automaticky spustí v místním režimu. Zde můžete nastavit, zda se mají data (počet interakcí) ukládat lokálně do prohlížeče.
-                </p>
-
-                <div class="flex items-center justify-between p-3 bg-slate-100 rounded-lg border border-slate-200">
-                    <label for="local-storage-toggle" class="text-slate-800 font-medium select-none cursor-pointer">
-                        Ukládat stav lokálně (do prohlížeče)
-                    </label>
-                    <input type="checkbox" id="local-storage-toggle" class="form-checkbox h-5 w-5 text-red-600 bg-gray-200 border-gray-300 rounded focus:ring-red-500 transition duration-150 ease-in-out cursor-pointer">
-                </div>
-                
-                <p id="storage-status" class="text-xs text-red-600 italic font-normal"></p>
+               <p class="text-sm text-gray-600 font-normal">
+                  Pokud není k dispozici Firebase, hra se automaticky spustí v místním režimu. Zde můžete nastavit, zda se mají data (počet interakcí) ukládat lokálně do prohlížeče.
+               </p>
+               <div class="flex items-center justify-between p-3 bg-slate-100 rounded-lg border border-slate-200">
+                  <label for="local-storage-toggle" class="text-slate-800 font-medium select-none cursor-pointer">
+                  Ukládat stav lokálně (do prohlížeče)
+                  </label>
+                  <input type="checkbox" id="local-storage-toggle" class="form-checkbox h-5 w-5 text-red-600 bg-gray-200 border-gray-300 rounded focus:ring-red-500 transition duration-150 ease-in-out cursor-pointer">
+               </div>
+               <p id="storage-status" class="text-xs text-red-600 italic font-normal"></p>
             </div>
-        </div>
-    </div>
-
-
-
-    <!-- Firebase Scripts -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, getDoc, setLogLevel, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // --- GLOBAL SETUP ---
-        setLogLevel('Debug');
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        // Použití window.__initial_auth_token pro zamezení Temporal Dead Zone
-        const initialAuthToken = typeof window.__initial_auth_token !== 'undefined' ? window.__initial_auth_token : undefined;
-        
-        // Klíč pro Local Storage
-        const LOCAL_STORAGE_KEY = `janis_pity_game_state_local_${appId}`;
-        const SETTINGS_KEY = `janis_pity_game_settings_${appId}`;
-
-
-        let db;
-        let auth;
-        let userId = null;
-        let isAuthReady = false;
-        let isFirebaseDisabled = false; // Flag pro záložní režim
-        
-        let gameState = {
-            interactionsCount: 0, 
-        };
-
-        let userSettings = {
-            useLocalStorage: false // Default vypnuto
-        };
-
-        let isTyping = false;
-        
-        // --- HISTORY TRACKING FOR NON-REPETITION (new feature) ---
-        const HISTORY_LIMIT = 5; // Minimální počet tahů před opakováním
-        let playerTemplateHistory = []; // Historie indexů pro dvojice hráčových zpráv
-        let openingHistory = []; // Historie indexů pro Janisovy úvodní fráze
-        let excuseHistory = []; // Historie indexů pro Janisovy hlavní výmluvy
-        let endingHistory = []; // Historie indexů pro Janisovy závěrečné fráze
-        // ---------------------------------------------------------
-
-
-        // --- GAME CONTENT (Combinatorial Excuses and Player Templates) ---
-
-        // 1. OPENINGS (Až 10 různých obratů)
-        const OPENINGS = [
-            "Promiň, včera jsem, běhal po úřadech. ",
-            "Vím, že jsem to slíbil, udělám to. ",
-	        "Nevěřil bys, co se stalo. ",
-	        "Strašně pomalu se učím, nikdy mi to nešlo. ",
-            "Od mala jsem měl problémy s dochvilností. ",
-            "Už jako dítě jsem byl takový. ",
-            "Máma mě do toho nutila, mám k tomu teď odpor...",
-            "Už mockrát jsem to zkoušel... ",
-            "Marketing nedělám, někoho na to najdem! ",
-            "Sorry, nefeeluju to, nejsem to já. ",
-            "Promiň, neměl jsem na to sílu, padla na mě deprese. ",
-            "Bylo to skoro hotové... ",
-            "Hele, fakt se snažím, ale zrovna dneska je to na hlavu! ",
-            "Měl jsem velkou věc. ",
-            "Teď to nejde, jinak bych to udělal. ",
-            "Rozjel jsem to! Pak jsem zjistil, že ne... ",
-            "Zdržela mě nečekaná událost. ",
-            "Musel jsem zařídit něco jinýho. ",
-            "Musíš pochopit, že to není jen tak ",
-            "Narazil jsem na problém. "
-        ];
-
-        // 2. MIDDLE / MASO (Původní výmluvy)
-        const EXCUSES = [
-            "Už jsem na to asi fakt starý ",
-            "Není to moje vina. ",
-            "Musím si to srovnat v hlavě... ",
-            "Nejdřív příští týden, dřív to nepůjde. ",
-            "Dnes mám naplánovaný uklidit, v tom chaosu nemůžu procovat. ",
-            "Odpoledne, já dopoledne nejsem tak produktivní ",
-            "Nekusíme něco složitějšího, viděl jsem na Instagramu jak na tom vydělávají velkej balík ",
-            "Nevím, nedokážu se na to vyladit! ",
-            "Pracoval jsem na tom, ale pak jsem usnul v křesle. ",
-            "Kámoš měl narozeniny, musel jsem se tam aspoň na chvíli podívat ",
-            "Jdu ven s týpkem, vlastní 5 firem, ten kontakt se bude hodit! ",
-            "To trvá moc dlouho. Napadne mě určitě něco lepšího ",
-            "Bylo mi fakt nějak špatně ",
-            "Mám nepřekonatelnou úzkost, jsem rád že jsem vstal z postele ",
-            "Jsem z tebe nervózní, musím se jít někam uklidnit ",
-            "Necítím se dobře, když mě pořád kontroluješ! ",
-            "Ty mě demotivuješ! ",
-            "Jsem na manuální práci... Rád dělám něco, co je hned vidět  ",
-            "To je pravda. Říkala to i máma ",
-            "Neznám nikoho, kdo by mi pomohl ",
-            "Koupil jsem si vitamíny",
-            "Musím si odpočinout ",
-            "Půjdu se vyspat, ať na to mám energii ",
-            "Teď před svátkama, to vůbec ne ",
-            "Mně přijde, že to zbytečně hrotíš ",
-            "Kam tak spěcháš? ",
-            "Dřív jsem hodně zkoumal věci ",
-            "Mám úzkost, když jsi negativní ",
-            "Už něco mám, už jsem to slíbil ", 
-            "Už to mám v plánu na zítra. ",
-            "Nikdo mě to nikdy neučil. ",
-            "Já nevím, co a jak se dělá... ",
-            "Chci něco originálního ",
-            "Měl jsem slabý internetový připojení ",
-            "Nebudu si na to dělat tabulky, nejsem blbec! ",
-            "Když tlačíš, mě to demotivuje! ",
-            "Fakt se snažím ",
-        ];
-
-        // 3. ENDINGS (Koncové fráze)
-        const ENDINGS = [
-            "Rozhodil jsi mě tou otázkou",
-            "Hmm, divný..",
-            "Tak snad příště",
-            "Proč bych lhal?",
-            "Mám poslední dobou problém se soustředit",
-            "Dost hektický období",
-            "Příští týden",
-	        "Myslel jsem, že si děláš srandu",
-        ];
-        
-        // PLAYER TEMPLATES (Zprávy v párech)
-        const PLAYER_TEMPLATES = [
-            ["Kdy to bude hotový?", "Už ses začal učit?"],
-            ["Už jsi udělal tu tabulku?", "Proč to vždycky odkládáš? V čem je problém?"],
-            ["Máš teď čas? Pojďme se to naučit společně.", "Už si je kontaktoval?"],
-            ["Viděl jsem, že to ještě není, proč?", "Tebe baví se nikam neposouvat?"],
-            ["Tohle je fakt důležité. Potřebujeme to dokončit.", "Zkus to dělat jen 15 minut denně, to zvládneš!"],
-            ["Co ta práce?", "Představ si ten tvůj milion. Ještě nesedíš v Lamborghini."],
-            ["Chceš být milionář. Co ti v tom brání?", "Neříkej mi, že za to můžu já, že nic neděláš!"],
-            ["Chceš radši dělat něco jiného?", "Neudělal bys to spíš teď, dokud máš ten nápad v hlavě?"],
-        ];
-
-        // --- UTILITY FUNCTIONS ---
-
-        function showMessage(text) {
-            const box = document.getElementById('message-box');
-            box.textContent = text;
-            box.classList.remove('hidden', 'opacity-0');
-            box.classList.add('opacity-100');
-            setTimeout(() => {
-                box.classList.remove('opacity-100');
-                box.classList.add('opacity-0');
-                setTimeout(() => box.classList.add('hidden'), 300);
-            }, 3000);
-        }
-
-        // Simulates typewriter effect
-        function typewriterEffect(element, text, callback) {
-            isTyping = true;
-            // Disable buttons while Janis is typing
-            document.querySelectorAll('.chat-option-btn').forEach(btn => btn.disabled = true);
-
-            let i = 0;
-            element.innerHTML = '<span class="typewriter-cursor"></span>'; // Start with only the cursor
-            
-            const typingInterval = setInterval(() => {
-                if (i < text.length) {
-                    element.innerHTML = text.substring(0, i + 1) + '<span class="typewriter-cursor"></span>';
-                    i++;
-                } else {
-                    clearInterval(typingInterval);
-                    element.innerHTML = text; // Final text without the cursor
-                    isTyping = false;
-                    // Re-enable buttons
-                    document.querySelectorAll('.chat-option-btn').forEach(btn => btn.disabled = false);
-                    if (callback) callback();
-                }
-            }, 40); // Speed of typing
-        }
-        function addChatMessage(sender, text, isTypingIndicator = false) {
-            const history = document.getElementById('chat-history');
-            
-            if (isTypingIndicator) {
-                // Remove any existing typing indicator first
-                const existingTyping = history.querySelector('.typing-indicator');
-                if (existingTyping) {
-                    existingTyping.remove();
-                }
-                
-                const typingDiv = document.createElement('div');
-                typingDiv.classList.add('typing-indicator', 'inline-flex');
-                typingDiv.innerHTML = '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
-                history.appendChild(typingDiv);
-            } else {
-                // Remove typing indicator if it exists
-                const existingTyping = history.querySelector('.typing-indicator');
-                if (existingTyping) {
-                    existingTyping.remove();
-                }
-                
-                const messageDiv = document.createElement('div');
-                messageDiv.classList.add('chat-message', 'text-sm', 'font-normal');
-                messageDiv.textContent = text;
-                
-                if (sender === 'player') {
-                    messageDiv.classList.add('player-bubble');
-                } else if (sender === 'janis') {
-                    messageDiv.classList.add('janis-bubble');
-                }
-
-                history.appendChild(messageDiv);
-            }
-            
-            history.scrollTop = history.scrollHeight; // Scroll to bottom
-        }
-
-        /**
-         * Vrátí bezpečný náhodný index, který není v historii. Aktualizuje historii.
-         * @param {Array} array Pole, ze kterého se má vybírat.
-         * @param {Array<number>} historyArray Historie již použitých indexů.
-         * @returns {number} Náhodný index.
-         */
-        function getSafeRandomIndex(array, historyArray) {
-            // Pokud je pole menší nebo rovno limitu, musíme povolit opakování, ale pokusíme se o cyklus.
-            // V našem případě máme sady zpráv > 5, takže by se opakování nemělo hned stát.
-            if (array.length <= HISTORY_LIMIT) {
-                return Math.floor(Math.random() * array.length);
-            }
-
-            let newIndex;
-            let attemptCount = 0;
-            const maxAttempts = 100; // Omezíme počet pokusů pro jistotu
-
-            do {
-                newIndex = Math.floor(Math.random() * array.length);
-                attemptCount++;
-                if (attemptCount > maxAttempts) break; // Zabráníme zacyklení, pokud by se pole zmenšilo
-            } while (historyArray.includes(newIndex));
-
-            // Aktualizace historie
-            historyArray.push(newIndex);
-            if (historyArray.length > HISTORY_LIMIT) {
-                historyArray.shift(); // Odstranění nejstaršího záznamu (FIFO)
-            }
-            return newIndex;
-        }
-
-        // --- LOCAL STORAGE FUNCTIONS ---
-        // ... (Zůstává nezměněno)
-
-        function loadSettings() {
-            try {
-                const storedSettings = localStorage.getItem(SETTINGS_KEY);
-                if (storedSettings) {
-                    userSettings = JSON.parse(storedSettings);
-                }
-            } catch (e) {
-                console.error("Error loading settings:", e);
-            }
-        }
-
-        function saveSettings() {
-            try {
-                localStorage.setItem(SETTINGS_KEY, JSON.stringify(userSettings));
-                updateStorageStatus();
-            } catch (e) {
-                console.error("Error saving settings:", e);
-                showMessage("Chyba: Nepodařilo se uložit nastavení do Local Storage.");
-            }
-        }
-
-        function loadLocalState() {
-            try {
-                const storedState = localStorage.getItem(LOCAL_STORAGE_KEY);
-                if (storedState) {
-                    gameState = JSON.parse(storedState);
-                    console.log("State loaded from Local Storage.");
-                } else {
-                    // Initialize local state if not found
-                    saveLocalState();
-                }
-            } catch (e) {
-                console.error("Error loading local state:", e);
-            }
-        }
-
-        function saveLocalState() {
-            try {
-                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(gameState));
-            } catch (e) {
-                console.error("Error saving local state:", e);
-            }
-        }
-
-        function updateStorageStatus() {
-            const statusEl = document.getElementById('storage-status');
-            const toggleEl = document.getElementById('local-storage-toggle');
-
-            toggleEl.checked = userSettings.useLocalStorage;
-
-            if (!isFirebaseDisabled) {
-                statusEl.textContent = `Data se ukládají pomocí Firebase (Uživatel ID: ${userId})`;
-                toggleEl.disabled = true;
-            } else {
-                toggleEl.disabled = false;
-                if (userSettings.useLocalStorage) {
-                    statusEl.textContent = `Používáte místní ukládání (Local Storage). Interakce se ukládají.`;
-                    statusEl.classList.remove('text-red-600');
-                    statusEl.classList.add('text-green-600');
-                } else {
-                    statusEl.textContent = `Hra je v místním režimu bez ukládání. Zapněte ukládání pro uchování interakcí.`;
-                    statusEl.classList.add('text-red-600');
-                    statusEl.classList.remove('text-green-600');
-                }
-            }
-        }
-
-        // --- GAME INTERACTION LOGIC ---
-        function updatePlayerOptions() {
-            const container = document.getElementById('player-options-container');
-            container.innerHTML = ''; // Clear previous options
-
-            // ZMĚNA: Náhodný výběr S OMEZENÍM OPAKOVÁNÍ sady zpráv pro hráče
-            const randomIndex = getSafeRandomIndex(PLAYER_TEMPLATES, playerTemplateHistory);
-            const templates = PLAYER_TEMPLATES[randomIndex];
-
-            templates.forEach(text => {
-                const button = document.createElement('button');
-                button.classList.add('chat-option-btn', 'player-bubble', 'chat-message', 'cursor-pointer', 'hover:bg-blue-600', 'transition-colors');
-                button.textContent = text;
-                button.style.marginBottom = '8px';
-                button.addEventListener('click', () => {
-                    if (!isTyping && isAuthReady) {
-                        handleUserSelection(text);
-                    }
-                });
-                container.appendChild(button);
-            });
-        }
-async function handleUserSelection(userInputText) {
-            
-            // 1. Add player input to chat history
-            addChatMessage('player', userInputText);
-            
-            // 2. Show typing indicator in chat history
-            addChatMessage('janis', '', true); // true = show typing indicator
-            
-            // 3. Generate Janis's combinatorial excuse using safe random selection
-            const openingIndex = getSafeRandomIndex(OPENINGS, openingHistory);
-            const middleIndex = getSafeRandomIndex(EXCUSES, excuseHistory);
-            const endingIndex = getSafeRandomIndex(ENDINGS, endingHistory);
-
-            const opening = OPENINGS[openingIndex];
-            const middle = EXCUSES[middleIndex];
-            const ending = ENDINGS[endingIndex];
-            
-            const janisExcuse = `${opening}${middle}. ${ending}`;
-            
-            let newCount;
-            
-            if (isFirebaseDisabled) {
-                // FALLBACK: Update local state 
-                newCount = gameState.interactionsCount + 1;
-                gameState.interactionsCount = newCount;
-
-                // Save to Local Storage if enabled
-                if (userSettings.useLocalStorage) {
-                    saveLocalState();
-                }
-
-            } else {
-                // FIREBASE: Perform the transaction to update interaction count
-                const docRef = doc(db, `artifacts/${appId}/users/${userId}/game_data/janis_procrastination_game`);
-                
-                const result = await runTransaction(db, async (transaction) => {
-                    const docSnap = await transaction.get(docRef);
-
-                    let currentCount = 0;
-                    if (docSnap.exists()) {
-                        currentCount = docSnap.data().interactionsCount || 0;
-                    }
-                    
-                    newCount = currentCount + 1;
-                    
-                    transaction.set(docRef, { interactionsCount: newCount });
-                    return { newCount };
-                }).catch((error) => {
-                    console.error("Transaction failed: ", error);
-                    showMessage("Chyba při záznamu interakce. Zkus to znovu.");
-                    return null;
-                });
-                if (!result) return; // Exit if transaction failed
-                newCount = result.newCount;
-            }
-
-            // 5. Update local state and UI
-            document.getElementById('interaction-count').textContent = newCount;
-            
-            // 6. Display new excuse with typewriter effect directly in chat history
-            setTimeout(() => {
-                // Remove typing indicator and add the actual message
-                addChatMessage('janis', janisExcuse);
-                
-                // 7. Update options for the next turn
-                updatePlayerOptions();
-            }, 1500); // Delay to simulate typing time
-}
-// --- SETTINGS MODAL LOGIC ---
-
-        function setupSettingsModal() {
-            const settingsBtn = document.getElementById('settings-button');
-            const closeBtn = document.getElementById('close-settings');
-            const modal = document.getElementById('settings-modal');
-            const toggle = document.getElementById('local-storage-toggle');
-            const modalContent = modal.querySelector('.modal-content');
-
-            // Open Modal
-            settingsBtn.addEventListener('click', () => {
-                updateStorageStatus();
-                modal.classList.remove('hidden', 'modal-hide', 'opacity-0');
-                modal.classList.add('flex', 'opacity-100', 'modal-show');
-                modalContent.style.transform = 'scale(1)';
-            });
-
-            // Close Modal with animation
-            function closeModal() {
-                modalContent.style.transform = 'scale(0.95)';
-                modal.classList.remove('opacity-100', 'modal-show');
-                modal.classList.add('opacity-0', 'modal-hide');
-                setTimeout(() => modal.classList.remove('flex'), 300);
-            }
-            
-            closeBtn.addEventListener('click', closeModal);
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    closeModal();
-                }
-            });
-
-            // Toggle Handler
-            toggle.addEventListener('change', () => {
-                userSettings.useLocalStorage = toggle.checked;
-                saveSettings();
-            });
-        }
-
-
-        // --- FIREBASE/FIRESTORE INTEGRATION ---
-        
-        async function loadGameState() {
-            if (!userId && !isFirebaseDisabled) return;
-
-            if (isFirebaseDisabled) {
-                // LOCAL MODE INIT
-                userId = 'LOCAL_MODE_USER';
-                document.getElementById('user-id-display').textContent = 'Místní Režim';
-                
-                if (userSettings.useLocalStorage) {
-                    loadLocalState();
-                    document.getElementById('user-id-display').textContent += ' (Lokální Ukládání)';
-                } else {
-                    gameState = { interactionsCount: 0 };
-                    document.getElementById('user-id-display').textContent += ' (BEZ ukládání)';
-                }
-                
-                isAuthReady = true;
-                console.log("Running in Local Mode (Firebase disabled).");
-
-            } else {
-                // FIREBASE MODE INIT
-                const docRef = doc(db, `artifacts/${appId}/users/${userId}/game_data/janis_procrastination_game`);
-                
-                try {
-                    const docSnap = await getDoc(docRef);
-                    if (docSnap.exists()) {
-                        gameState = docSnap.data();
-                    } else {
-                        await setDoc(docRef, gameState);
-                    }
-
-                    // Set up real-time listener
-                    onSnapshot(docRef, (doc) => {
-                        if (doc.exists() && isAuthReady) {
-                            const newGlobalState = doc.data();
-                            gameState.interactionsCount = newGlobalState.interactionsCount;
-                            document.getElementById('interaction-count').textContent = newGlobalState.interactionsCount;
-                        }
-                    });
-                    isAuthReady = true;
-                } catch (e) {
-                    console.error("Error loading game state:", e);
-                    document.getElementById('loading-screen').textContent = "Chyba při načítání dat z Firebase.";
-                    return;
-                }
-            }
-            // Final UI setup (Common to both modes)
-            document.getElementById('interaction-count').textContent = gameState.interactionsCount;
-            updatePlayerOptions(); // Setup the dynamic options
-
-            // Show game container
-            document.getElementById('loading-screen').classList.add('hidden');
-            document.getElementById('game-container').classList.remove('hidden', 'opacity-0');
-            document.getElementById('game-container').classList.add('opacity-100');
-}
-
-        async function initFirebase() {
-            loadSettings(); // Načíst nastavení hned na začátku
-
-            // Kontrola, zda chybí konfigurační data
-            const isConfigMissing = Object.keys(firebaseConfig).length === 0;
-            const isTokenMissing = typeof initialAuthToken === 'undefined';
-
-            if (isConfigMissing || isTokenMissing) {
-                 console.warn("Firebase config or auth token is missing. Switching to Local Mode.");
+         </div>
+      </div>
+      <!-- Firebase Scripts -->
+      <script type="module">
+         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+         import { getFirestore, doc, setDoc, onSnapshot, getDoc, setLogLevel, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+         
+         // --- GLOBAL SETUP ---
+         setLogLevel('Debug');
+         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+         // Použití window.__initial_auth_token pro zamezení Temporal Dead Zone
+         const initialAuthToken = typeof window.__initial_auth_token !== 'undefined' ? window.__initial_auth_token : undefined;
+         
+         // Klíč pro Local Storage
+         const LOCAL_STORAGE_KEY = `janis_pity_game_state_local_${appId}`;
+         const SETTINGS_KEY = `janis_pity_game_settings_${appId}`;
+         
+         
+         let db;
+         let auth;
+         let userId = null;
+         let isAuthReady = false;
+         let isFirebaseDisabled = false; // Flag pro záložní režim
+         
+         let gameState = {
+             interactionsCount: 0, 
+         };
+         
+         let userSettings = {
+             useLocalStorage: false // Default vypnuto
+         };
+         
+         let isTyping = false;
+         
+         // --- HISTORY TRACKING FOR NON-REPETITION (new feature) ---
+         const HISTORY_LIMIT = 5; // Minimální počet tahů před opakováním
+         let playerTemplateHistory = []; // Historie indexů pro dvojice hráčových zpráv
+         let openingHistory = []; // Historie indexů pro Janisovy úvodní fráze
+         let excuseHistory = []; // Historie indexů pro Janisovy hlavní výmluvy
+         let endingHistory = []; // Historie indexů pro Janisovy závěrečné fráze
+         // ---------------------------------------------------------
+         
+         
+         // --- GAME CONTENT (Combinatorial Excuses and Player Templates) ---
+         
+         // 1. OPENINGS (Až 10 různých obratů)
+         const OPENINGS = [
+             "Promiň, včera jsem, běhal po úřadech. ",
+             "Vím, že jsem to slíbil, udělám to. ",
+          "Má divný období. ",
+          "Strašně pomalu se učím, nikdy mi to nešlo. ",
+             "Od mala jsem měl problémy s dochvilností. ",
+             "Už jako dítě jsem byl takový. ",
+             "Máma mě do toho nutila, mám k tomu teď odpor...",
+             "Už mockrát jsem to zkoušel... ",
+             "Marketing nedělám, někoho na to najdem! ",
+             "Sorry, nefeeluju to, nejsem to já. ",
+             "Promiň, neměl jsem na to sílu, padla na mě deprese. ",
+             "Bylo to skoro hotové... ",
+             "Hele, fakt se snažím, ale zrovna dneska je to na hlavu! ",
+             "Měl jsem velkou věc. ",
+             "Teď to nejde, jinak bych to udělal. ",
+             "Rozjel jsem to! Pak jsem zjistil, že ne... ",
+             "Zdržela mě nečekaná událost. ",
+             "Musel jsem zařídit něco jinýho. ",
+         "Není to moje vina. ",
+             "Musím si to srovnat v hlavě... ",
+             "Nejdřív příští týden, dřív to nepůjde. ",
+             "Dnes mám naplánovaný uklidit, v tom chaosu nemůžu procovat. ",
+             "Odpoledne, já dopoledne nejsem tak produktivní ",
+             "Nekusíme něco složitějšího, viděl jsem na Instagramu jak na tom vydělávají velkej balík ",
+             "Nevím, nedokážu se na to vyladit! ",
+             "Pracoval jsem na tom, ale pak jsem usnul v křesle. ",
+             "Kámoš měl narozeniny, musel jsem se tam aspoň na chvíli podívat ",
+             "Jdu ven s týpkem, vlastní 5 firem, ten kontakt se bude hodit! ",
+             "To trvá moc dlouho. Napadne mě určitě něco lepšího ",
+             "Bylo mi fakt nějak špatně ",
+             "Mám nepřekonatelnou úzkost, jsem rád že jsem vstal z postele ",
+             "Jsem z tebe nervózní, musím se jít někam uklidnit ",
+             "Necítím se dobře, když mě pořád kontroluješ! ",
+             "Ty mě demotivuješ! ",
+             "Jsem na manuální práci... Rád dělám něco, co je hned vidět  ",
+             "To je pravda. Říkala to i máma ",
+             "Neznám nikoho, kdo by mi pomohl ",
+             "Koupil jsem si vitamíny",
+             "Musíš pochopit, že to není jen tak ",
+         "Čekám na odpověď, bez toho nemůžu pokračovat. ",
+         
+         "Mám to v hlavě, jenom si to potřebuju utřídit. ",
+         
+         "Začnu na tom pracovat. ",
+         
+         "Ještě v tom nemám systém.",
+         "Můj počítač se sekal a nic nešlo. ",
+         
+         
+         "Zapomněl jsem zapsat co to bylo. ",
+         
+         
+         "Byl jsem tak zavalený jinou prací, že na tohle nezbyl čas. ",
+         
+         
+         
+         "Je to tak jednoduché, to stihnu v pohodě za hodinu ",
+         "Chtěl jsem to udělat, ale pak jsem si vzpomněl na tu druhou věc. ",
+         
+         
+         
+         "Řekl jsem si, že si dám malou přestávku... a ta se protáhla. ",
+         
+         
+         "Byl jsem moc unavený, abych se do toho pouštěl. ",
+         
+         
+         "Potřebuju se na to namotivovat. ",
+         
+         
+         "Myslel jsem, že to máš na starosti ty. ",
+         
+         "Počkám až na pondělí, to je nový start. ",
+         
+         "Doma byl takový nepořádek, že jsem se nemohl soustředit.",
+         
+         "Řekl jsem si, že si nejdřív zkontroluju e-maily... a najednou byl večer. ",
+         
+         
+         "Nechtěl jsem to pokazit, tak jsem radši čekal. ",
+         
+         "Měl jsem špatný den, zítra to bude určitě lepší. ",
+         
+         "Vůbec jsem si nevšiml, kolik je hodin. ",
+         
+         "Musím to nechat uzrát v hlavě. ",
+             "Narazil jsem na problém. ",
+         
+         ];
+         
+         // 2. MIDDLE / MASO (Původní výmluvy)
+         const EXCUSES = [
+             "Už jsem na to asi fakt starý ",
+             "Musím si odpočinout ",
+             "Půjdu se vyspat, ať na to mám energii ",
+             "Teď před svátkama, to vůbec ne ",
+             "Mně přijde, že to zbytečně hrotíš ",
+             "Kam tak spěcháš? ",
+             "Dřív jsem hodně zkoumal věci ",
+             "Mám úzkost, když jsi negativní ",
+             "Už něco mám, už jsem to slíbil ", 
+             "Už to mám v plánu na zítra. ",
+             "Nikdo mě to nikdy neučil. ",
+             "Já nevím, co a jak se dělá... ",
+             "Chci něco originálního ",
+             "Měl jsem slabý internetový připojení ",
+             "Nebudu si na to dělat tabulky, nejsem blbec! ",
+             "Když tlačíš, mě to demotivuje! ",
+             "Fakt se snažím ",
+         "Rozhodil jsi mě tou otázkou",
+             "Hmm, divný..",
+             "Tak snad příště",
+             "Proč bych lhal?",
+             "Mám poslední dobou problém se soustředit",
+             "Dost hektický období",
+             "Příští týden",
+         "Myslel jsem, že si děláš srandu",
+         "Ještě na to nemám všechny podklady.",
+         
+         
+         "Čekám, na to nový vydání, mluvili jsme o tom.",
+         
+         
+         "Ještě to musím pořádně promyslet.",
+         
+         
+         "Nejdu do toho, dokud nemám stoprocentní jistotu, že to vyjde.",
+         
+         
+         "Teď na to nemám prostě čas.",
+         
+         
+         "Je to na mém seznamu úkolů, jen jsem se k tomu ještě nedostal.",
+         
+         
+         "Mám teď důležitější věci na starosti.",
+         
+         
+         "Čekám na ten správný okamžik.",
+         
+         
+         "Potřebuju si o tom ještě s někým promluvit.",
+         
+         
+         "Nejdřív si musím vyřešit auto.",
+         
+         
+         "Chtěl jsem to udělat, ale přišla neočekávaná věc.",
+         
+         
+         "Jsem přepracovaný a vyhořelý, musíš na mě pomalu.",
+         
+         
+         "Dneska se mi do toho prostě nechce, zítra budu mít lepší den.",
+         
+         
+         "Hledám nejefektivnější způsob, jak to udělat.",
+         
+         
+         "Je to skoro hotové, chybí jen doladit detaily." ,
+         
+         
+         "Nechci do toho jít na půl plynu.",
+         
+         
+         "Počkám, až budu mít víc energie.",
+         
+         
+         "Je to dlouhodobý úkol, není kam spěchat.",
+         
+         
+         "Řekl jsem si, že si dám nejdřív od všeho na chvíli pauzu, než se do toho pustím naplno.",
+         
+         ];
+         
+         // 3. ENDINGS (Koncové fráze)
+         const ENDINGS = [
+            "",
+         ];
+         
+         // PLAYER TEMPLATES (Zprávy v párech)
+         const PLAYER_TEMPLATES = [
+             ["Kdy to bude hotový?", "Už ses začal učit?"],
+             ["Už jsi udělal tu tabulku?", "Proč to vždycky odkládáš? V čem je problém?"],
+             ["Máš teď čas? Pojďme se to naučit společně.", "Už si je kontaktoval?"],
+             ["Viděl jsem, že to ještě není, proč?", "Tebe baví se nikam neposouvat?"],
+             ["Tohle je fakt důležité. Potřebujeme to dokončit.", "Zkus to dělat jen 15 minut denně, to zvládneš!"],
+             ["Co ta práce?", "Představ si ten tvůj milion. Ještě nesedíš v Lamborghini."],
+             ["Chceš být milionář. Co ti v tom brání?", "Neříkej mi, že za to můžu já, že nic neděláš!"],
+             ["Chceš radši dělat něco jiného?", "Neudělal bys to spíš teď, dokud máš ten nápad v hlavě?"],
+         ];
+         
+         // --- UTILITY FUNCTIONS ---
+         
+         function showMessage(text) {
+             const box = document.getElementById('message-box');
+             box.textContent = text;
+             box.classList.remove('hidden', 'opacity-0');
+             box.classList.add('opacity-100');
+             setTimeout(() => {
+                 box.classList.remove('opacity-100');
+                 box.classList.add('opacity-0');
+                 setTimeout(() => box.classList.add('hidden'), 300);
+             }, 3000);
+         }
+         
+         // Simulates typewriter effect
+         function typewriterEffect(element, text, callback) {
+             isTyping = true;
+             // Disable buttons while Janis is typing
+             document.querySelectorAll('.chat-option-btn').forEach(btn => btn.disabled = true);
+         
+             let i = 0;
+             element.innerHTML = '<span class="typewriter-cursor"></span>'; // Start with only the cursor
+             
+             const typingInterval = setInterval(() => {
+                 if (i < text.length) {
+                     element.innerHTML = text.substring(0, i + 1) + '<span class="typewriter-cursor"></span>';
+                     i++;
+                 } else {
+                     clearInterval(typingInterval);
+                     element.innerHTML = text; // Final text without the cursor
+                     isTyping = false;
+                     // Re-enable buttons
+                     document.querySelectorAll('.chat-option-btn').forEach(btn => btn.disabled = false);
+                     if (callback) callback();
+                 }
+             }, 40); // Speed of typing
+         }
+         function addChatMessage(sender, text, isTypingIndicator = false) {
+             const history = document.getElementById('chat-history');
+             
+             if (isTypingIndicator) {
+                 // Remove any existing typing indicator first
+                 const existingTyping = history.querySelector('.typing-indicator');
+                 if (existingTyping) {
+                     existingTyping.remove();
+                 }
+                 
+                 const typingDiv = document.createElement('div');
+                 typingDiv.classList.add('typing-indicator', 'inline-flex');
+                 typingDiv.innerHTML = '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
+                 history.appendChild(typingDiv);
+             } else {
+                 // Remove typing indicator if it exists
+                 const existingTyping = history.querySelector('.typing-indicator');
+                 if (existingTyping) {
+                     existingTyping.remove();
+                 }
+                 
+                 const messageDiv = document.createElement('div');
+                 messageDiv.classList.add('chat-message', 'text-sm', 'font-normal');
+                 messageDiv.textContent = text;
+                 
+                 if (sender === 'player') {
+                     messageDiv.classList.add('player-bubble');
+                 } else if (sender === 'janis') {
+                     messageDiv.classList.add('janis-bubble');
+                 }
+         
+                 history.appendChild(messageDiv);
+             }
+             
+             history.scrollTop = history.scrollHeight; // Scroll to bottom
+         }
+         
+         /**
+          * Vrátí bezpečný náhodný index, který není v historii. Aktualizuje historii.
+          * @param {Array} array Pole, ze kterého se má vybírat.
+          * @param {Array<number>} historyArray Historie již použitých indexů.
+          * @returns {number} Náhodný index.
+          */
+         function getSafeRandomIndex(array, historyArray) {
+             // Pokud je pole menší nebo rovno limitu, musíme povolit opakování, ale pokusíme se o cyklus.
+             // V našem případě máme sady zpráv > 5, takže by se opakování nemělo hned stát.
+             if (array.length <= HISTORY_LIMIT) {
+                 return Math.floor(Math.random() * array.length);
+             }
+         
+             let newIndex;
+             let attemptCount = 0;
+             const maxAttempts = 100; // Omezíme počet pokusů pro jistotu
+         
+             do {
+                 newIndex = Math.floor(Math.random() * array.length);
+                 attemptCount++;
+                 if (attemptCount > maxAttempts) break; // Zabráníme zacyklení, pokud by se pole zmenšilo
+             } while (historyArray.includes(newIndex));
+         
+             // Aktualizace historie
+             historyArray.push(newIndex);
+             if (historyArray.length > HISTORY_LIMIT) {
+                 historyArray.shift(); // Odstranění nejstaršího záznamu (FIFO)
+             }
+             return newIndex;
+         }
+         
+         // --- LOCAL STORAGE FUNCTIONS ---
+         // ... (Zůstává nezměněno)
+         
+         function loadSettings() {
+             try {
+                 const storedSettings = localStorage.getItem(SETTINGS_KEY);
+                 if (storedSettings) {
+                     userSettings = JSON.parse(storedSettings);
+                 }
+             } catch (e) {
+                 console.error("Error loading settings:", e);
+             }
+         }
+         
+         function saveSettings() {
+             try {
+                 localStorage.setItem(SETTINGS_KEY, JSON.stringify(userSettings));
+                 updateStorageStatus();
+             } catch (e) {
+                 console.error("Error saving settings:", e);
+                 showMessage("Chyba: Nepodařilo se uložit nastavení do Local Storage.");
+             }
+         }
+         
+         function loadLocalState() {
+             try {
+                 const storedState = localStorage.getItem(LOCAL_STORAGE_KEY);
+                 if (storedState) {
+                     gameState = JSON.parse(storedState);
+                     console.log("State loaded from Local Storage.");
+                 } else {
+                     // Initialize local state if not found
+                     saveLocalState();
+                 }
+             } catch (e) {
+                 console.error("Error loading local state:", e);
+             }
+         }
+         
+         function saveLocalState() {
+             try {
+                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(gameState));
+             } catch (e) {
+                 console.error("Error saving local state:", e);
+             }
+         }
+         
+         function updateStorageStatus() {
+             const statusEl = document.getElementById('storage-status');
+             const toggleEl = document.getElementById('local-storage-toggle');
+         
+             toggleEl.checked = userSettings.useLocalStorage;
+         
+             if (!isFirebaseDisabled) {
+                 statusEl.textContent = `Data se ukládají pomocí Firebase (Uživatel ID: ${userId})`;
+                 toggleEl.disabled = true;
+             } else {
+                 toggleEl.disabled = false;
+                 if (userSettings.useLocalStorage) {
+                     statusEl.textContent = `Používáte místní ukládání (Local Storage). Interakce se ukládají.`;
+                     statusEl.classList.remove('text-red-600');
+                     statusEl.classList.add('text-green-600');
+                 } else {
+                     statusEl.textContent = `Hra je v místním režimu bez ukládání. Zapněte ukládání pro uchování interakcí.`;
+                     statusEl.classList.add('text-red-600');
+                     statusEl.classList.remove('text-green-600');
+                 }
+             }
+         }
+         
+         // --- GAME INTERACTION LOGIC ---
+         function updatePlayerOptions() {
+             const container = document.getElementById('player-options-container');
+             container.innerHTML = ''; // Clear previous options
+         
+             // ZMĚNA: Náhodný výběr S OMEZENÍM OPAKOVÁNÍ sady zpráv pro hráče
+             const randomIndex = getSafeRandomIndex(PLAYER_TEMPLATES, playerTemplateHistory);
+             const templates = PLAYER_TEMPLATES[randomIndex];
+         
+             templates.forEach(text => {
+                 const button = document.createElement('button');
+                 button.classList.add('chat-option-btn', 'player-bubble', 'chat-message', 'cursor-pointer', 'hover:bg-blue-600', 'transition-colors');
+                 button.textContent = text;
+                 button.style.marginBottom = '8px';
+                 button.addEventListener('click', () => {
+                     if (!isTyping && isAuthReady) {
+                         handleUserSelection(text);
+                     }
+                 });
+                 container.appendChild(button);
+             });
+         }
+         async function handleUserSelection(userInputText) {
+             
+             // 1. Add player input to chat history
+             addChatMessage('player', userInputText);
+             
+             // 2. Show typing indicator in chat history
+             addChatMessage('janis', '', true); // true = show typing indicator
+             
+             // 3. Generate Janis's combinatorial excuse using safe random selection
+             const openingIndex = getSafeRandomIndex(OPENINGS, openingHistory);
+             const middleIndex = getSafeRandomIndex(EXCUSES, excuseHistory);
+             const endingIndex = getSafeRandomIndex(ENDINGS, endingHistory);
+         
+             const opening = OPENINGS[openingIndex];
+             const middle = EXCUSES[middleIndex];
+             const ending = ENDINGS[endingIndex];
+             
+             const janisExcuse = `${opening}${middle}. ${ending}`;
+             
+             let newCount;
+             
+             if (isFirebaseDisabled) {
+                 // FALLBACK: Update local state 
+                 newCount = gameState.interactionsCount + 1;
+                 gameState.interactionsCount = newCount;
+         
+                 // Save to Local Storage if enabled
+                 if (userSettings.useLocalStorage) {
+                     saveLocalState();
+                 }
+         
+             } else {
+                 // FIREBASE: Perform the transaction to update interaction count
+                 const docRef = doc(db, `artifacts/${appId}/users/${userId}/game_data/janis_procrastination_game`);
+                 
+                 const result = await runTransaction(db, async (transaction) => {
+                     const docSnap = await transaction.get(docRef);
+         
+                     let currentCount = 0;
+                     if (docSnap.exists()) {
+                         currentCount = docSnap.data().interactionsCount || 0;
+                     }
+                     
+                     newCount = currentCount + 1;
+                     
+                     transaction.set(docRef, { interactionsCount: newCount });
+                     return { newCount };
+                 }).catch((error) => {
+                     console.error("Transaction failed: ", error);
+                     showMessage("Chyba při záznamu interakce. Zkus to znovu.");
+                     return null;
+                 });
+                 if (!result) return; // Exit if transaction failed
+                 newCount = result.newCount;
+             }
+         
+             // 5. Update local state and UI
+             document.getElementById('interaction-count').textContent = newCount;
+             
+             // 6. Display new excuse with typewriter effect directly in chat history
+             setTimeout(() => {
+                 // Remove typing indicator and add the actual message
+                 addChatMessage('janis', janisExcuse);
+                 
+                 // 7. Update options for the next turn
+                 updatePlayerOptions();
+             }, 1500); // Delay to simulate typing time
+         }
+         // --- SETTINGS MODAL LOGIC ---
+         
+         function setupSettingsModal() {
+             const settingsBtn = document.getElementById('settings-button');
+             const closeBtn = document.getElementById('close-settings');
+             const modal = document.getElementById('settings-modal');
+             const toggle = document.getElementById('local-storage-toggle');
+             const modalContent = modal.querySelector('.modal-content');
+         
+             // Open Modal
+             settingsBtn.addEventListener('click', () => {
+                 updateStorageStatus();
+                 modal.classList.remove('hidden', 'modal-hide', 'opacity-0');
+                 modal.classList.add('flex', 'opacity-100', 'modal-show');
+                 modalContent.style.transform = 'scale(1)';
+             });
+         
+             // Close Modal with animation
+             function closeModal() {
+                 modalContent.style.transform = 'scale(0.95)';
+                 modal.classList.remove('opacity-100', 'modal-show');
+                 modal.classList.add('opacity-0', 'modal-hide');
+                 setTimeout(() => modal.classList.remove('flex'), 300);
+             }
+             
+             closeBtn.addEventListener('click', closeModal);
+             modal.addEventListener('click', (e) => {
+                 if (e.target === modal) {
+                     closeModal();
+                 }
+             });
+         
+             // Toggle Handler
+             toggle.addEventListener('change', () => {
+                 userSettings.useLocalStorage = toggle.checked;
+                 saveSettings();
+             });
+         }
+         
+         
+         // --- FIREBASE/FIRESTORE INTEGRATION ---
+         
+         async function loadGameState() {
+             if (!userId && !isFirebaseDisabled) return;
+         
+             if (isFirebaseDisabled) {
+                 // LOCAL MODE INIT
+                 userId = 'LOCAL_MODE_USER';
+                 document.getElementById('user-id-display').textContent = 'Místní Režim';
+                 
+                 if (userSettings.useLocalStorage) {
+                     loadLocalState();
+                     document.getElementById('user-id-display').textContent += ' (Lokální Ukládání)';
+                 } else {
+                     gameState = { interactionsCount: 0 };
+                     document.getElementById('user-id-display').textContent += ' (BEZ ukládání)';
+                 }
+                 
+                 isAuthReady = true;
+                 console.log("Running in Local Mode (Firebase disabled).");
+         
+             } else {
+                 // FIREBASE MODE INIT
+                 const docRef = doc(db, `artifacts/${appId}/users/${userId}/game_data/janis_procrastination_game`);
+                 
+                 try {
+                     const docSnap = await getDoc(docRef);
+                     if (docSnap.exists()) {
+                         gameState = docSnap.data();
+                     } else {
+                         await setDoc(docRef, gameState);
+                     }
+         
+                     // Set up real-time listener
+                     onSnapshot(docRef, (doc) => {
+                         if (doc.exists() && isAuthReady) {
+                             const newGlobalState = doc.data();
+                             gameState.interactionsCount = newGlobalState.interactionsCount;
+                             document.getElementById('interaction-count').textContent = newGlobalState.interactionsCount;
+                         }
+                     });
+                     isAuthReady = true;
+                 } catch (e) {
+                     console.error("Error loading game state:", e);
+                     document.getElementById('loading-screen').textContent = "Chyba při načítání dat z Firebase.";
+                     return;
+                 }
+             }
+             // Final UI setup (Common to both modes)
+             document.getElementById('interaction-count').textContent = gameState.interactionsCount;
+             updatePlayerOptions(); // Setup the dynamic options
+         
+             // Show game container
+             document.getElementById('loading-screen').classList.add('hidden');
+             document.getElementById('game-container').classList.remove('hidden', 'opacity-0');
+             document.getElementById('game-container').classList.add('opacity-100');
+         }
+         
+         async function initFirebase() {
+             loadSettings(); // Načíst nastavení hned na začátku
+         
+             // Kontrola, zda chybí konfigurační data
+             const isConfigMissing = Object.keys(firebaseConfig).length === 0;
+             const isTokenMissing = typeof initialAuthToken === 'undefined';
+         
+             if (isConfigMissing || isTokenMissing) {
+                  console.warn("Firebase config or auth token is missing. Switching to Local Mode.");
+                  isFirebaseDisabled = true;
+                  await loadGameState();
+                  return;
+             }
+             
+             try {
+                 const app = initializeApp(firebaseConfig);
+                 db = getFirestore(app);
+                 auth = getAuth(app);
+             } catch (e) {
+                 console.error("Firebase initialization failed:", e);
                  isFirebaseDisabled = true;
                  await loadGameState();
                  return;
-            }
-            
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-            } catch (e) {
-                console.error("Firebase initialization failed:", e);
-                isFirebaseDisabled = true;
-                await loadGameState();
-                return;
-            }
-
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    userId = user.uid;
-                    document.getElementById('user-id-display').textContent = userId;
-                    await loadGameState();
-                } else {
-                    try {
-                         if (initialAuthToken) {
-                            await signInWithCustomToken(auth, initialAuthToken);
-                         } else {
-                            await signInAnonymously(auth);
-                         }
-                    } catch (error) {
-                         console.error("Authentication failed:", error);
-                         document.getElementById('loading-screen').textContent = "Chyba autentizace. Přepínám na místní režim.";
-                         isFirebaseDisabled = true;
-                         await loadGameState();
-                    }
-                }
-            });
-        }
-        
-        // --- INITIALIZATION ---
-        window.onload = () => {
-            initFirebase();
-            setupSettingsModal();
-        };
-    </script>
-</body>
+             }
+         
+             onAuthStateChanged(auth, async (user) => {
+                 if (user) {
+                     userId = user.uid;
+                     document.getElementById('user-id-display').textContent = userId;
+                     await loadGameState();
+                 } else {
+                     try {
+                          if (initialAuthToken) {
+                             await signInWithCustomToken(auth, initialAuthToken);
+                          } else {
+                             await signInAnonymously(auth);
+                          }
+                     } catch (error) {
+                          console.error("Authentication failed:", error);
+                          document.getElementById('loading-screen').textContent = "Chyba autentizace. Přepínám na místní režim.";
+                          isFirebaseDisabled = true;
+                          await loadGameState();
+                     }
+                 }
+             });
+         }
+         
+         // --- INITIALIZATION ---
+         window.onload = () => {
+             initFirebase();
+             setupSettingsModal();
+         };
+      </script>
+   </body>
 </html>
