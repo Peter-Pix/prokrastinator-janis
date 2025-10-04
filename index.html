@@ -271,8 +271,15 @@
         };
 
         let isTyping = false;
-        // Původní: let currentTemplateIndex = 0; // Index pro PLAYER_TEMPLATES
-        // Tuto proměnnou již nepotřebujeme, protože vybíráme náhodně.
+        
+        // --- HISTORY TRACKING FOR NON-REPETITION (new feature) ---
+        const HISTORY_LIMIT = 5; // Minimální počet tahů před opakováním
+        let playerTemplateHistory = []; // Historie indexů pro dvojice hráčových zpráv
+        let openingHistory = []; // Historie indexů pro Janisovy úvodní fráze
+        let excuseHistory = []; // Historie indexů pro Janisovy hlavní výmluvy
+        let endingHistory = []; // Historie indexů pro Janisovy závěrečné fráze
+        // ---------------------------------------------------------
+
 
         // --- GAME CONTENT (Combinatorial Excuses and Player Templates) ---
 
@@ -280,8 +287,8 @@
         const OPENINGS = [
             "Promiň, včera jsem, běhal po úřadech. ",
             "Vím, že jsem to slíbil, udělám to. ",
-	    "Nevěřil bys, co se stalo. ",
-	    "Strašně pomalu se učím, nikdy mi to nešlo. ",
+	        "Nevěřil bys, co se stalo. ",
+	        "Strašně pomalu se učím, nikdy mi to nešlo. ",
             "Od mala jsem měl problémy s dochvilností. ",
             "Už jako dítě jsem byl takový. ",
             "Máma mě do toho nutila, mám k tomu teď odpor...",
@@ -350,7 +357,7 @@
             "Mám poslední dobou problém se soustředit",
             "Dost hektický období",
             "Příští týden",
-	    "Myslel jsem, že si děláš srandu",
+	        "Myslel jsem, že si děláš srandu",
         ];
         
         // PLAYER TEMPLATES (Zprávy v párech)
@@ -438,11 +445,40 @@
             
             history.scrollTop = history.scrollHeight; // Scroll to bottom
         }
-function getRandomElement(array) {
-            return array[Math.floor(Math.random() * array.length)];
+
+        /**
+         * Vrátí bezpečný náhodný index, který není v historii. Aktualizuje historii.
+         * @param {Array} array Pole, ze kterého se má vybírat.
+         * @param {Array<number>} historyArray Historie již použitých indexů.
+         * @returns {number} Náhodný index.
+         */
+        function getSafeRandomIndex(array, historyArray) {
+            // Pokud je pole menší nebo rovno limitu, musíme povolit opakování, ale pokusíme se o cyklus.
+            // V našem případě máme sady zpráv > 5, takže by se opakování nemělo hned stát.
+            if (array.length <= HISTORY_LIMIT) {
+                return Math.floor(Math.random() * array.length);
+            }
+
+            let newIndex;
+            let attemptCount = 0;
+            const maxAttempts = 100; // Omezíme počet pokusů pro jistotu
+
+            do {
+                newIndex = Math.floor(Math.random() * array.length);
+                attemptCount++;
+                if (attemptCount > maxAttempts) break; // Zabráníme zacyklení, pokud by se pole zmenšilo
+            } while (historyArray.includes(newIndex));
+
+            // Aktualizace historie
+            historyArray.push(newIndex);
+            if (historyArray.length > HISTORY_LIMIT) {
+                historyArray.shift(); // Odstranění nejstaršího záznamu (FIFO)
+            }
+            return newIndex;
         }
-        
+
         // --- LOCAL STORAGE FUNCTIONS ---
+        // ... (Zůstává nezměněno)
 
         function loadSettings() {
             try {
@@ -516,8 +552,9 @@ function getRandomElement(array) {
             const container = document.getElementById('player-options-container');
             container.innerHTML = ''; // Clear previous options
 
-            // ZMĚNA: Náhodný výběr sady zpráv pro hráče (namísto sekvenčního indexu)
-            const templates = getRandomElement(PLAYER_TEMPLATES);
+            // ZMĚNA: Náhodný výběr S OMEZENÍM OPAKOVÁNÍ sady zpráv pro hráče
+            const randomIndex = getSafeRandomIndex(PLAYER_TEMPLATES, playerTemplateHistory);
+            const templates = PLAYER_TEMPLATES[randomIndex];
 
             templates.forEach(text => {
                 const button = document.createElement('button');
@@ -540,10 +577,15 @@ async function handleUserSelection(userInputText) {
             // 2. Show typing indicator in chat history
             addChatMessage('janis', '', true); // true = show typing indicator
             
-            // 3. Generate Janis's combinatorial excuse
-            const opening = getRandomElement(OPENINGS);
-            const middle = getRandomElement(EXCUSES);
-            const ending = getRandomElement(ENDINGS);
+            // 3. Generate Janis's combinatorial excuse using safe random selection
+            const openingIndex = getSafeRandomIndex(OPENINGS, openingHistory);
+            const middleIndex = getSafeRandomIndex(EXCUSES, excuseHistory);
+            const endingIndex = getSafeRandomIndex(ENDINGS, endingHistory);
+
+            const opening = OPENINGS[openingIndex];
+            const middle = EXCUSES[middleIndex];
+            const ending = ENDINGS[endingIndex];
+            
             const janisExcuse = `${opening}${middle}. ${ending}`;
             
             let newCount;
@@ -583,9 +625,6 @@ async function handleUserSelection(userInputText) {
                 newCount = result.newCount;
             }
 
-            // Původní: 4. Update template index for the next interaction
-            // currentTemplateIndex++; // Tuto logiku nyní vynecháváme pro náhodný výběr
-            
             // 5. Update local state and UI
             document.getElementById('interaction-count').textContent = newCount;
             
